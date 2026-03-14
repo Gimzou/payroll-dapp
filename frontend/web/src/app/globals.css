@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #f7f7f5;
+  --color-foreground: #1a1a2e;
+  --color-primary: #c9a227;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f0e6c8;
+  --color-secondary-foreground: #6b5a1e;
+  --color-accent: #d4a843;
+  --color-muted: #f3f0ea;
+  --color-muted-foreground: #7c7c8a;
+  --color-border: #e5e2db;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a2e;
+  --color-surface: #faf9f7;
+}
+
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --primary: var(--color-primary);
+  --secondary: var(--color-secondary);
+  --accent: var(--color-accent);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.card-elevated {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #b8921f;
+  box-shadow: 0 2px 8px rgba(201, 162, 39, 0.25);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--color-foreground);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--color-muted);
+  border-color: #d0cdc6;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Table ── */
+.table-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-row {
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.1s ease;
+}
+
+.table-row:hover {
+  background: var(--color-surface);
+}
+
+/* ── Input ── */
+input[type="text"],
+input[type="number"] {
+  color: var(--color-foreground);
+}
+
+input::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.badge-success {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-warning {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.badge-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.badge-neutral {
+  background: var(--color-muted);
+  color: var(--color-muted-foreground);
+  border: 1px solid var(--color-border);
+}
