@@ -103,6 +103,8 @@ export default function EmployeeDashboard({ signer }: { signer: ethers.Signer })
     handleClaim,
   } = useFHEEmployee(signer);
 
+  const [salaryPeriod, setSalaryPeriod] = useState<'second' | 'hour' | 'day' | 'month' | 'year'>('month');
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32">
@@ -127,8 +129,6 @@ export default function EmployeeDashboard({ signer }: { signer: ethers.Signer })
       </div>
     );
   }
-
-  const [salaryPeriod, setSalaryPeriod] = useState<'second' | 'hour' | 'day' | 'month' | 'year'>('month');
 
   const PERIOD_MULTIPLIERS: Record<string, { factor: number; label: string }> = {
     second: { factor: 1, label: '/s' },
