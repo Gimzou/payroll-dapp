@@ -635,7 +635,7 @@ export default function EmployerDashboard({ signer }: { signer: ethers.Signer })
                             <p className="text-xs font-medium text-muted-foreground mb-1.5">Hired</p>
                             <p className="text-sm text-foreground">{formatTimestamp(emp.hiredAt)}</p>
                           </div>
-                          {emp.lastUpdate > 0n && (
+                          {emp.lastUpdate > BigInt(0) && (
                             <div>
                               <p className="text-xs font-medium text-muted-foreground mb-1.5">Last Sync</p>
                               <p className="text-sm text-foreground">{formatTimestamp(emp.lastUpdate)}</p>

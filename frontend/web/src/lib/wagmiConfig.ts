@@ -1,10 +1,27 @@
-import { http } from "wagmi";
+import { http, createConfig } from "wagmi";
 import { sepolia, hardhat } from "wagmi/chains";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import {
+  metaMaskWallet,
+  injectedWallet,
+  rainbowWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 
-export const config = getDefaultConfig({
-  appName: "FHE Payroll DApp",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "",
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "Recommended",
+      wallets: [metaMaskWallet, injectedWallet, rainbowWallet],
+    },
+  ],
+  {
+    appName: "FHE Payroll DApp",
+    projectId: "unused", // Using manual connectors avoids WalletConnect requirement for the build
+  },
+);
+
+export const config = createConfig({
+  connectors,
   chains: [hardhat, sepolia],
   transports: {
     [hardhat.id]: http("http://127.0.0.1:8545"),
