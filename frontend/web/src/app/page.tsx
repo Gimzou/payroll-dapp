@@ -26,8 +26,13 @@ function HomeContent() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const signer = useEthersSigner();
+  const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState<'employer' | 'employee' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const isSupportedNetwork = chainId === 31337 || chainId === 11155111;
 
   const switchToSepolia = () => switchChain({ chainId: 11155111 });
@@ -74,7 +79,7 @@ function HomeContent() {
 
   return (
     <AppLayout>
-      {!isConnected ? (
+      {!mounted || !isConnected ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
