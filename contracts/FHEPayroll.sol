@@ -139,15 +139,20 @@ contract FHEPayroll is ZamaEthereumConfig {
         emit EmployeeStatusChanged(_employee, EmployeeStatus.Inactive, EmployeeStatus.Active);
     }
 
-    /// @notice Terminate an employee
+    /// @notice Terminate an employee (allowed from Active or Inactive/Paused status)
     /// @param _employee  Address of the employee.
-    function terminateEmployee(address _employee) external onlyEmployer onlyStatus(_employee, EmployeeStatus.Active) {
+    function terminateEmployee(address _employee) external onlyEmployer {
+        EmployeeStatus current = employees[_employee].status;
+        require(
+            current == EmployeeStatus.Active || current == EmployeeStatus.Inactive,
+            "Payroll: employee must be Active or Inactive"
+        );
         _accrueEarnings(_employee);
 
         employees[_employee].lastUpdate = uint64(block.timestamp);
         employees[_employee].status = EmployeeStatus.Terminated;
 
-        emit EmployeeStatusChanged(_employee, EmployeeStatus.Active, EmployeeStatus.Terminated);
+        emit EmployeeStatusChanged(_employee, current, EmployeeStatus.Terminated);
     }
 
     /// @notice Delete an employee from the payroll
@@ -178,7 +183,12 @@ contract FHEPayroll is ZamaEthereumConfig {
         address _employee,
         externalEuint64 _encryptedSalary,
         bytes calldata _inputProof
-    ) external onlyEmployer onlyStatus(_employee, EmployeeStatus.Active) {
+    ) external onlyEmployer {
+        require(
+            employees[_employee].status == EmployeeStatus.Active ||
+            employees[_employee].status == EmployeeStatus.Inactive,
+            "Payroll: employee must be Active or Inactive"
+        );
         _accrueEarnings(_employee);
 
         euint64 salary = FHE.fromExternal(_encryptedSalary, _inputProof);
@@ -203,6 +213,14 @@ contract FHEPayroll is ZamaEthereumConfig {
         require(employees[_employee].status != EmployeeStatus.None, "Payroll: employee not found");
 
         return employees[_employee].encSalary;
+    }
+
+    /// @notice On-demand earnings accrual — lets any authorised party sync the
+    ///         claimable balance without changing employment status.
+    /// @param _employee  Address of the employee.
+    function accrueEarnings(address _employee) external onlyEmployerOrSelf(_employee) {
+        require(employees[_employee].status == EmployeeStatus.Active, "Payroll: employee must be Active");
+        _accrueEarnings(_employee);
     }
 
     /// @notice Accrue earnings for an employee

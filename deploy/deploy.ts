@@ -37,5 +37,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.id = "deploy_payroll_v1";
+func.id = "deploy_payroll_v3";
 func.tags = ["Payroll"];

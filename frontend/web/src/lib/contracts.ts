@@ -1,5 +1,5 @@
-export const FHE_PAYROLL_ADDRESS = "0x4bd92C9071eD964D6cCDcD5cb9C5E1228b07bC42";
-export const FHE_TOKEN_ADDRESS = "0xa83e2fEe2eDE144482A79fAd1301dcE8e013Fc4c";
+export const FHE_PAYROLL_ADDRESS = "0xfD039f32740dC24B2d8644A1e8914204E7ea034d";
+// Token address is resolved at runtime via payrollContract.paymentToken() — no hardcoded constant needed.
 
 export const NETWORK_CONFIG = {
   // Local Hardhat Node
@@ -38,6 +38,7 @@ export const FHE_PAYROLL_ABI = [
   "function deactivateEmployee(address) external",
   "function terminateEmployee(address) external",
   "function deleteEmployee(address) external",
+  "function accrueEarnings(address) external",
   "function claimPay() external",
   "event EmployeeAdded(address indexed employee)",
   "event SalaryUpdated(address indexed employee)",
