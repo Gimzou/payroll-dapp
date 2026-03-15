@@ -1,27 +1,27 @@
 {
-  "name": "fhevm-hardhat-template",
-  "description": "Hardhat-based template for developing FHEVM Solidity smart contracts",
-  "version": "0.4.1",
+  "name": "confidential-payroll",
+  "description": "Confidential payroll system using FHE",
+  "version": "0.1.0",
   "engines": {
     "node": ">=20",
     "npm": ">=7.0.0"
   },
   "license": "BSD-3-Clause-Clear",
-  "homepage": "https://github.com/zama-ai/fhevm-hardhat-template/README.md",
+  "homepage": "https://github.com/Gimzou/payroll-dapp#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zama-ai/fhevm-hardhat-template.git"
+    "url": "git+https://github.com/Gimzou/payroll-dapp.git"
   },
   "keywords": [
     "fhevm",
     "zama",
-    "eth",
+    "fhe",
+    "payroll",
+    "confidential",
     "ethereum",
-    "dapps",
-    "wallet",
-    "web3",
-    "typescript",
-    "hardhat"
+    "solidity",
+    "hardhat",
+    "typescript"
   ],
   "dependencies": {
     "@fhevm/mock-utils": "^0.4.2",

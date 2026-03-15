@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       1000000000, // initial amount (as scalar, will be encrypted in constructor)
       "Confidential USDC", // name
       "cUSDC", // symbol
-      "" // tokenURI
+      "", // tokenURI
     ],
     log: true,
   });
@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     args: [
       token.address,
-      deployer // employer
+      deployer, // employer
     ],
     log: true,
   });

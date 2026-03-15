@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { FHE, euint64, externalEuint64 } from "@fhevm/solidity/lib/FHE.sol";
-import { ZamaEthereumConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
-import { ERC7984 } from "@openzeppelin/confidential-contracts/token/ERC7984/ERC7984.sol";
+import {FHE, euint64, externalEuint64} from "@fhevm/solidity/lib/FHE.sol";
+import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {ERC7984} from "@openzeppelin/confidential-contracts/token/ERC7984/ERC7984.sol";
 
 contract FHEPayroll is ZamaEthereumConfig {
-
     // ── Types ────────────────────────────────────────────────────────────────
     enum EmployeeStatus {
         None,
@@ -21,7 +20,7 @@ contract FHEPayroll is ZamaEthereumConfig {
         uint64 hiredAt;
         uint64 lastUpdate;
         // ── FHE fields (handles — re-grant ACL on every write) ─
-        euint64 encSalary;        // salary in token per second
+        euint64 encSalary; // salary in token per second
         euint64 encClaimable; // claimable amount
         euint64 encTotalReceived; // cumulative pay
     }
@@ -166,7 +165,7 @@ contract FHEPayroll is ZamaEthereumConfig {
             employeeList[indexToRemove] = lastEmployee;
             employees[lastEmployee].index = indexToRemove;
         }
-        
+
         employeeList.pop();
 
         delete employees[_employee];
@@ -186,7 +185,7 @@ contract FHEPayroll is ZamaEthereumConfig {
     ) external onlyEmployer {
         require(
             employees[_employee].status == EmployeeStatus.Active ||
-            employees[_employee].status == EmployeeStatus.Inactive,
+                employees[_employee].status == EmployeeStatus.Inactive,
             "Payroll: employee must be Active or Inactive"
         );
         _accrueEarnings(_employee);
@@ -195,21 +194,16 @@ contract FHEPayroll is ZamaEthereumConfig {
         employees[_employee].encSalary = salary;
 
         // Grant decryption rights
-        FHE.allowThis(employees[_employee].encSalary);        
-        FHE.allow(employees[_employee].encSalary, employer);  
-        FHE.allow(employees[_employee].encSalary, _employee);  
+        FHE.allowThis(employees[_employee].encSalary);
+        FHE.allow(employees[_employee].encSalary, employer);
+        FHE.allow(employees[_employee].encSalary, _employee);
 
         emit SalaryUpdated(_employee);
     }
 
     /// @notice Returns the encrypted handle  of the salary (expressed in payment token per second)
     /// @param _employee  Address of the employee.
-    function getSalary(address _employee) 
-        external 
-        view 
-        onlyEmployerOrSelf(_employee)
-        returns (euint64) 
-    {
+    function getSalary(address _employee) external view onlyEmployerOrSelf(_employee) returns (euint64) {
         require(employees[_employee].status != EmployeeStatus.None, "Payroll: employee not found");
 
         return employees[_employee].encSalary;
@@ -235,11 +229,11 @@ contract FHEPayroll is ZamaEthereumConfig {
         if (employee.status == EmployeeStatus.Active && elapsedSeconds > 0) {
             // Use scalar operands when possible to save gas
             euint64 newlyEarned = FHE.mul(employee.encSalary, elapsedSeconds);
-            
+
             // Add the newly earned amount to the "claimable amount"
             euint64 newClaimable = FHE.add(employee.encClaimable, newlyEarned);
             employee.encClaimable = newClaimable;
-            
+
             FHE.allowThis(employee.encClaimable);
             FHE.allow(employee.encClaimable, employer);
             FHE.allow(employee.encClaimable, _employee);
@@ -254,8 +248,8 @@ contract FHEPayroll is ZamaEthereumConfig {
     function claimPay() external {
         require(
             employees[msg.sender].status == EmployeeStatus.Active ||
-            employees[msg.sender].status == EmployeeStatus.Inactive ||
-            employees[msg.sender].status == EmployeeStatus.Terminated,
+                employees[msg.sender].status == EmployeeStatus.Inactive ||
+                employees[msg.sender].status == EmployeeStatus.Terminated,
             "Payroll: employee not found"
         );
         Employee storage employee = employees[msg.sender];
@@ -277,8 +271,7 @@ contract FHEPayroll is ZamaEthereumConfig {
         FHE.allow(employee.encClaimable, msg.sender);
 
         paymentToken.confidentialTransferFrom(employer, msg.sender, claimable);
-        
+
         emit PayWithdrawn(msg.sender, nowTime);
     }
-
 }

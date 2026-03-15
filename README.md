@@ -1,22 +1,26 @@
 # FHE Payroll DApp
 
-A confidential payroll system built on [Zama's FHEVM](https://docs.zama.ai/fhevm). Employee salaries, claimable balances, and total earnings are **fully encrypted on-chain** using Fully Homomorphic Encryption — no one can read them without an explicit decryption grant, not even a block explorer.
+A confidential payroll system built on [Zama's FHEVM](https://docs.zama.ai/fhevm). Employee salaries, claimable
+balances, and total earnings are **fully encrypted on-chain** using Fully Homomorphic Encryption — no one can read them
+without an explicit decryption grant, not even a block explorer.
 
-> **Live demo:** _[link coming after deployment]_
-> **Network:** Sepolia testnet
+> **Live demo:** _[link coming after deployment]_ **Network:** Sepolia testnet
 
 ---
 
 ## What makes this different
 
-Traditional on-chain payroll exposes every salary and payment in plain text. This dApp keeps all compensation figures as FHE ciphertexts stored in the smart contract. Values are only decrypted when the authorised party (employer or the employee themselves) explicitly requests it — the decryption happens off-chain via Zama's relayer and KMS, never on the chain itself.
+Traditional on-chain payroll exposes every salary and payment in plain text. This dApp keeps all compensation figures as
+FHE ciphertexts stored in the smart contract. Values are only decrypted when the authorised party (employer or the
+employee themselves) explicitly requests it — the decryption happens off-chain via Zama's relayer and KMS, never on the
+chain itself.
 
-| What is encrypted | Who can decrypt |
-|---|---|
+| What is encrypted           | Who can decrypt    |
+| --------------------------- | ------------------ |
 | Salary rate (tokens/second) | Employer, employee |
-| Claimable balance | Employer, employee |
-| Lifetime received | Employer, employee |
-| Token wallet balance | Token holder only |
+| Claimable balance           | Employer, employee |
+| Lifetime received           | Employer, employee |
+| Token wallet balance        | Token holder only  |
 
 ---
 
@@ -49,10 +53,12 @@ Traditional on-chain payroll exposes every salary and payment in plain text. Thi
 ```
 
 **Contracts**
+
 - `FHEPayroll.sol` — manages the employee registry, encrypted salary accrual, and pay claims
 - `FHEToken.sol` — ERC-7984 confidential ERC-20 used as the payment token (symbol: `cUSDC`)
 
 **Frontend**
+
 - Role detection: checks whether the connected wallet is the `employer` or a registered employee
 - Employer view: employee table with encrypted payroll fields, on-demand accrual sync, expandable rows with hire dates
 - Employee view: personal dashboard with salary rate, claimable balance, wallet balance, and pay claim flow
@@ -98,7 +104,8 @@ cd frontend/web
 npm run dev        # http://localhost:3001
 ```
 
-> The dev server sets the required COOP/COEP headers automatically via `next.config.ts`. No extra configuration needed for local FHE operations.
+> The dev server sets the required COOP/COEP headers automatically via `next.config.ts`. No extra configuration needed
+> for local FHE operations.
 
 ---
 
@@ -122,7 +129,8 @@ The token address is resolved at runtime via `payrollContract.paymentToken()`.
 npm run verify:sepolia
 ```
 
-> To force a clean redeploy (useful before a demo), bump `func.id` in `deploy/deploy.ts` (e.g. `deploy_payroll_v3` → `deploy_payroll_v4`) and re-run the deploy script.
+> To force a clean redeploy (useful before a demo), bump `func.id` in `deploy/deploy.ts` (e.g. `deploy_payroll_v3` →
+> `deploy_payroll_v4`) and re-run the deploy script.
 
 ---
 
@@ -140,15 +148,16 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<your-id> npm run build
 
 ### Automated (GitHub Actions)
 
-Every push to `main` that touches `frontend/web/**` triggers [`.github/workflows/deploy-frontend.yml`](.github/workflows/deploy-frontend.yml).
+Every push to `main` that touches `frontend/web/**` triggers
+[`.github/workflows/deploy-frontend.yml`](.github/workflows/deploy-frontend.yml).
 
 **Required GitHub secrets:**
 
-| Secret | Where to get it |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → API Tokens → Create Token (use the "Edit Cloudflare Pages" template) |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → right sidebar on any domain page |
-| `WALLETCONNECT_PROJECT_ID` | [cloud.walletconnect.com](https://cloud.walletconnect.com) → New Project (free) |
+| Secret                     | Where to get it                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`     | Cloudflare dashboard → My Profile → API Tokens → Create Token (use the "Edit Cloudflare Pages" template) |
+| `CLOUDFLARE_ACCOUNT_ID`    | Cloudflare dashboard → right sidebar on any domain page                                                  |
+| `WALLETCONNECT_PROJECT_ID` | [cloud.walletconnect.com](https://cloud.walletconnect.com) → New Project (free)                          |
 
 **One-time Cloudflare Pages setup:**
 
@@ -157,7 +166,8 @@ Every push to `main` that touches `frontend/web/**` triggers [`.github/workflows
 npx wrangler pages project create fhe-payroll
 ```
 
-Or create the project in the Cloudflare dashboard (Pages → Create a project → Direct Upload, name it `fhe-payroll`). The GitHub Action will push to it automatically from then on.
+Or create the project in the Cloudflare dashboard (Pages → Create a project → Direct Upload, name it `fhe-payroll`). The
+GitHub Action will push to it automatically from then on.
 
 ---
 
@@ -167,8 +177,10 @@ Or create the project in the Cloudflare dashboard (Pages → Create a project �
 
 1. Connect the deployer wallet (the address that ran `deploy:sepolia`)
 2. The app detects the employer role automatically
-3. Click **Authorize Distributions** — this calls `setOperator` on `FHEToken`, allowing the payroll contract to transfer tokens on `claimPay`
-4. Click **Add Employee** — enter a wallet address and a salary rate; the value is FHE-encrypted in the browser before submission
+3. Click **Authorize Distributions** — this calls `setOperator` on `FHEToken`, allowing the payroll contract to transfer
+   tokens on `claimPay`
+4. Click **Add Employee** — enter a wallet address and a salary rate; the value is FHE-encrypted in the browser before
+   submission
 5. Use **Zap (⚡)** on any active employee to sync accrued earnings on-chain
 6. Click the **eye icon** on any encrypted cell to decrypt and reveal the value
 7. Expand any row with the **chevron** to see hire date, last sync timestamp, and the full address
@@ -178,27 +190,30 @@ Or create the project in the Cloudflare dashboard (Pages → Create a project �
 1. Connect a wallet that has been registered by the employer
 2. The app detects the employee role and shows the personal dashboard
 3. Click **Sync & Decrypt** on the claimable card to accrue earnings and decrypt in one step
-4. Click **Claim Pay** to transfer the claimable amount to your wallet (requires the employer to have authorised distributions first)
+4. Click **Claim Pay** to transfer the claimable amount to your wallet (requires the employer to have authorised
+   distributions first)
 
 ### Funding the contract
 
-The deployer wallet receives the full `cUSDC` supply on deploy. Before the demo, the employer must hold enough tokens — no explicit `transfer` to the contract is needed since `claimPay` uses `confidentialTransferFrom` on the approved operator.
+The deployer wallet receives the full `cUSDC` supply on deploy. Before the demo, the employer must hold enough tokens —
+no explicit `transfer` to the contract is needed since `claimPay` uses `confidentialTransferFrom` on the approved
+operator.
 
 ---
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| FHE | [Zama FHEVM](https://github.com/zama-ai/fhevm) — `@fhevm/solidity` |
-| Smart contracts | Solidity 0.8.27, Hardhat, hardhat-deploy |
-| Token standard | ERC-7984 (OpenZeppelin confidential contracts) |
-| Frontend | Next.js 16, React 19, TypeScript |
-| Web3 | wagmi v2, viem, ethers.js v6 |
-| Wallet UI | RainbowKit |
-| FHE browser SDK | `@zama-fhe/react-sdk`, `@zama-fhe/relayer-sdk` |
-| Styling | Tailwind CSS v4, Framer Motion |
-| CI/CD | GitHub Actions, Cloudflare Pages |
+| Layer           | Technology                                                         |
+| --------------- | ------------------------------------------------------------------ |
+| FHE             | [Zama FHEVM](https://github.com/zama-ai/fhevm) — `@fhevm/solidity` |
+| Smart contracts | Solidity 0.8.27, Hardhat, hardhat-deploy                           |
+| Token standard  | ERC-7984 (OpenZeppelin confidential contracts)                     |
+| Frontend        | Next.js 16, React 19, TypeScript                                   |
+| Web3            | wagmi v2, viem, ethers.js v6                                       |
+| Wallet UI       | RainbowKit                                                         |
+| FHE browser SDK | `@zama-fhe/react-sdk`, `@zama-fhe/relayer-sdk`                     |
+| Styling         | Tailwind CSS v4, Framer Motion                                     |
+| CI/CD           | GitHub Actions, Cloudflare Pages                                   |
 
 ---
 
@@ -236,4 +251,4 @@ BSD-3-Clause-Clear — see [LICENSE](LICENSE).
 
 ---
 
-*Built for the [Zama Developer Program](https://www.zama.ai/developer-program)*
+_Built for the [Zama Developer Program](https://www.zama.ai/developer-program)_
