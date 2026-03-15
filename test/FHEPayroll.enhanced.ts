@@ -75,8 +75,10 @@ describe("FHEPayroll Enhanced Tests", function () {
       expect(decryptedByAlice).to.equal(MONTHLY_SALARY);
 
       // Bob (unauthorized) cannot access getEmployee even if he knows the address
-      await expect(fhepayroll.connect(bob).getEmployee(alice.address))
-        .to.be.revertedWithCustomError(fhepayroll, "NotEmployerOrSelf");
+      await expect(fhepayroll.connect(bob).getEmployee(alice.address)).to.be.revertedWithCustomError(
+        fhepayroll,
+        "NotEmployerOrSelf",
+      );
     });
   });
 
@@ -197,11 +199,9 @@ describe("FHEPayroll Enhanced Tests", function () {
         .add64(MONTHLY_SALARY)
         .encrypt();
 
-      await expect(fhepayroll.connect(alice).addEmployee(
-        bob.address,
-        encryptedSalary.handles[0],
-        encryptedSalary.inputProof
-      )).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
+      await expect(
+        fhepayroll.connect(alice).addEmployee(bob.address, encryptedSalary.handles[0], encryptedSalary.inputProof),
+      ).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
     });
 
     it("should revert if non-employer tries to update salary", async function () {
@@ -212,11 +212,9 @@ describe("FHEPayroll Enhanced Tests", function () {
         .add64(MONTHLY_SALARY * 2n)
         .encrypt();
 
-      await expect(fhepayroll.connect(alice).updateSalary(
-        alice.address,
-        encryptedSalary.handles[0],
-        encryptedSalary.inputProof
-      )).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
+      await expect(
+        fhepayroll.connect(alice).updateSalary(alice.address, encryptedSalary.handles[0], encryptedSalary.inputProof),
+      ).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
     });
   });
 

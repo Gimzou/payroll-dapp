@@ -1,11 +1,7 @@
 import { http, createConfig } from "wagmi";
 import { sepolia, hardhat } from "wagmi/chains";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import {
-  metaMaskWallet,
-  injectedWallet,
-  rainbowWallet,
-} from "@rainbow-me/rainbowkit/wallets";
+import { metaMaskWallet, injectedWallet, rainbowWallet } from "@rainbow-me/rainbowkit/wallets";
 
 const connectors = connectorsForWallets(
   [
