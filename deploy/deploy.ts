@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployer, // owner
       1000000000, // initial amount (as scalar, will be encrypted in constructor)
       "Confidential USDC", // name
-      "cUSDC", // symbol
+      "USDCz", // symbol
       "", // tokenURI
     ],
     log: true,
@@ -37,5 +37,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.id = "deploy_payroll_v3";
+func.id = "deploy_payroll_v4";
 func.tags = ["Payroll"];

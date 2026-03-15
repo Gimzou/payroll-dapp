@@ -1,4 +1,4 @@
-export const FHE_PAYROLL_ADDRESS = "0xfD039f32740dC24B2d8644A1e8914204E7ea034d";
+export const FHE_PAYROLL_ADDRESS = "0x3734095f5eC9a20247Fb32AF82800750a0e25078";
 // Token address is resolved at runtime via payrollContract.paymentToken() — no hardcoded constant needed.
 
 export const NETWORK_CONFIG = {
