@@ -2,6 +2,9 @@
 fhevmTemp
 
 # directories
+frontend/web/.next
+frontend/web/out
+frontend/web/node_modules
 .coverage_artifacts
 .coverage_cache
 .coverage_contracts

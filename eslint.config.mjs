@@ -18,6 +18,8 @@ export default tseslint.config(
       "dist/**",
       "node_modules/**",
       "types/**",
+      "frontend/**",
+      ".claude/**",
       "*.env",
       "*.log",
       "coverage.json",
