@@ -4,7 +4,8 @@ A confidential payroll system built on [Zama's FHEVM](https://docs.zama.ai/fhevm
 balances, and total earnings are **fully encrypted on-chain** using Fully Homomorphic Encryption — no one can read them
 without an explicit decryption grant, not even a block explorer.
 
-> **Live demo:** _[link coming after deployment]_ **Network:** Sepolia testnet
+> **Live demo:** _[https://d42db8b6.fhe-payroll.pages.dev](https://d42db8b6.fhe-payroll.pages.dev)_ **Network:** Sepolia
+> testnet
 
 ---
 
