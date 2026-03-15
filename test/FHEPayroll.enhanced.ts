@@ -11,13 +11,12 @@ describe("FHEPayroll Enhanced Tests", function () {
   let employer: HardhatEthersSigner;
   let alice: HardhatEthersSigner;
   let bob: HardhatEthersSigner;
-  let charlie: HardhatEthersSigner;
 
   const INITIAL_TOKEN_AMOUNT = 1_000_000_000n; // 1B tokens
   const MONTHLY_SALARY = 5000n; // Salary in tokens per second (simplified for testing)
 
   beforeEach(async function () {
-    [employer, alice, bob, charlie] = await ethers.getSigners();
+    [employer, alice, bob] = await ethers.getSigners();
 
     // Deploy FHEToken
     const fheTokenFactory = (await ethers.getContractFactory("FHEToken")) as FHEToken__factory;
@@ -76,9 +75,8 @@ describe("FHEPayroll Enhanced Tests", function () {
       expect(decryptedByAlice).to.equal(MONTHLY_SALARY);
 
       // Bob (unauthorized) cannot access getEmployee even if he knows the address
-      await expect(fhepayroll.connect(bob).getEmployee(alice.address)).to.be.revertedWith(
-        "Payroll: not employer or self",
-      );
+      await expect(fhepayroll.connect(bob).getEmployee(alice.address))
+        .to.be.revertedWithCustomError(fhepayroll, "NotEmployerOrSelf");
     });
   });
 
@@ -91,8 +89,8 @@ describe("FHEPayroll Enhanced Tests", function () {
 
       // Deactivate
       await fhepayroll.connect(employer).deactivateEmployee(alice.address);
-      let emp = await fhepayroll.getEmployee(alice.address);
-      let claimableAtDeactivation = await fhevm.userDecryptEuint(
+      const emp = await fhepayroll.getEmployee(alice.address);
+      const claimableAtDeactivation = await fhevm.userDecryptEuint(
         FhevmType.euint64,
         emp.encClaimable,
         await fhepayroll.getAddress(),
@@ -199,9 +197,11 @@ describe("FHEPayroll Enhanced Tests", function () {
         .add64(MONTHLY_SALARY)
         .encrypt();
 
-      await expect(
-        fhepayroll.connect(alice).addEmployee(bob.address, encryptedSalary.handles[0], encryptedSalary.inputProof),
-      ).to.be.revertedWith("Payroll: not employer");
+      await expect(fhepayroll.connect(alice).addEmployee(
+        bob.address,
+        encryptedSalary.handles[0],
+        encryptedSalary.inputProof
+      )).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
     });
 
     it("should revert if non-employer tries to update salary", async function () {
@@ -212,9 +212,11 @@ describe("FHEPayroll Enhanced Tests", function () {
         .add64(MONTHLY_SALARY * 2n)
         .encrypt();
 
-      await expect(
-        fhepayroll.connect(alice).updateSalary(alice.address, encryptedSalary.handles[0], encryptedSalary.inputProof),
-      ).to.be.revertedWith("Payroll: not employer");
+      await expect(fhepayroll.connect(alice).updateSalary(
+        alice.address,
+        encryptedSalary.handles[0],
+        encryptedSalary.inputProof
+      )).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
     });
   });
 
@@ -243,16 +245,18 @@ describe("FHEPayroll Enhanced Tests", function () {
 
     it("should revert when called by a third party", async function () {
       await addEmployee(alice, MONTHLY_SALARY);
-      await expect(fhepayroll.connect(bob).accrueEarnings(alice.address)).to.be.revertedWith(
-        "Payroll: not employer or self",
+      await expect(fhepayroll.connect(bob).accrueEarnings(alice.address)).to.be.revertedWithCustomError(
+        fhepayroll,
+        "NotEmployerOrSelf",
       );
     });
 
     it("should revert for a non-Active employee", async function () {
       await addEmployee(alice, MONTHLY_SALARY);
       await fhepayroll.connect(employer).deactivateEmployee(alice.address);
-      await expect(fhepayroll.connect(employer).accrueEarnings(alice.address)).to.be.revertedWith(
-        "Payroll: employee must be Active",
+      await expect(fhepayroll.connect(employer).accrueEarnings(alice.address)).to.be.revertedWithCustomError(
+        fhepayroll,
+        "EmployeeNotActive",
       );
     });
   });

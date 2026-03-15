@@ -14,18 +14,17 @@ import { FhevmType } from "@fhevm/hardhat-plugin";
  */
 
 describe("Confidential Payroll", function () {
-  let fhetoken: any;
-  let fhepayroll: any;
+  let fhetoken: FHEToken;
+  let fhepayroll: FHEPayroll;
 
   let employer: HardhatEthersSigner;
   let alice: HardhatEthersSigner;
   let bob: HardhatEthersSigner;
-  let charlie: HardhatEthersSigner;
 
   const INITIAL_TOKEN_AMOUNT = 10_000_000_000n; // 10M FHE tokens
 
   beforeEach(async function () {
-    [employer, alice, bob, charlie] = await ethers.getSigners();
+    [employer, alice, bob] = await ethers.getSigners();
 
     // Deploy FHEToken
     const fheTokenFactory = (await ethers.getContractFactory("FHEToken")) as FHEToken__factory;
@@ -100,7 +99,7 @@ describe("Confidential Payroll", function () {
 
       await expect(
         fhepayroll.connect(bob).addEmployee(alice.address, encryptedSalary.handles[0], encryptedSalary.inputProof),
-      ).to.be.revertedWith("Payroll: not employer");
+      ).to.be.revertedWithCustomError(fhepayroll, "NotEmployer");
 
       await expect(
         fhepayroll.connect(employer).addEmployee(alice.address, encryptedSalary.handles[0], encryptedSalary.inputProof),

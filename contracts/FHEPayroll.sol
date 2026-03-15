@@ -5,6 +5,9 @@ import {FHE, euint64, externalEuint64} from "@fhevm/solidity/lib/FHE.sol";
 import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 import {ERC7984} from "@openzeppelin/confidential-contracts/token/ERC7984/ERC7984.sol";
 
+/// @title FHE Payroll Contract
+/// @author Gimzou
+/// @notice Manages confidential salaries and payroll using Zama FHE
 contract FHEPayroll is ZamaEthereumConfig {
     // ── Types ────────────────────────────────────────────────────────────────
     enum EmployeeStatus {
@@ -25,35 +28,71 @@ contract FHEPayroll is ZamaEthereumConfig {
         euint64 encTotalReceived; // cumulative pay
     }
 
+    // ── Errors ───────────────────────────────────────────────────────────────
+
+    error NotEmployer();
+    error NotEmployerOrSelf();
+    error InvalidEmployeeStatus(EmployeeStatus required, EmployeeStatus current);
+    error InvalidEmployeeAddress();
+    error EmployeeNotFound();
+    error EmployeeNotActive();
+    error EmployeeMustBeActiveOrInactive();
+
     // ── State ────────────────────────────────────────────────────────────────
 
+    /// @notice The address of the employer
     address public employer;
+
+    /// @notice The payment token contract (ERC7984)
     ERC7984 public paymentToken;
+
+    /// @notice List of all employee addresses
     address[] public employeeList;
-    mapping(address => Employee) public employees;
+
+    /// @notice Mapping from employee address to their data
+    mapping(address employee => Employee data) public employees;
 
     // ── Events ───────────────────────────────────────────────────────────────
 
+    /// @notice Emitted when a new employee is added
+    /// @param employee The address of the added employee
     event EmployeeAdded(address indexed employee);
+
+    /// @notice Emitted when an employee's status changes
+    /// @param employee The address of the employee
+    /// @param oldStatus The previous status
+    /// @param newStatus The new status
     event EmployeeStatusChanged(address indexed employee, EmployeeStatus oldStatus, EmployeeStatus newStatus);
+
+    /// @notice Emitted when an employee is deleted from the payroll
+    /// @param employee The address of the deleted employee
     event EmployeeDeleted(address indexed employee);
+
+    /// @notice Emitted when an employee's salary is updated
+    /// @param employee The address of the employee
     event SalaryUpdated(address indexed employee);
-    event PayWithdrawn(address indexed employee, uint64 timestamp);
+
+    /// @notice Emitted when an employee claims their pay
+    /// @param employee The address of the employee
+    /// @param timestamp The time of withdrawal
+    event PayWithdrawn(address indexed employee, uint64 indexed timestamp);
 
     // ── Access control ───────────────────────────────────────────────────────
 
     modifier onlyEmployer() {
-        require(msg.sender == employer, "Payroll: not employer");
+        if (msg.sender != employer) revert NotEmployer();
         _;
     }
 
     modifier onlyEmployerOrSelf(address _employee) {
-        require(msg.sender == employer || msg.sender == _employee, "Payroll: not employer or self");
+        if (msg.sender != employer && msg.sender != _employee) revert NotEmployerOrSelf();
         _;
     }
 
     modifier onlyStatus(address _employee, EmployeeStatus _requiredStatus) {
-        require(employees[_employee].status == _requiredStatus, "Payroll: invalid employee status");
+        if (employees[_employee].status != _requiredStatus) {
+            revert InvalidEmployeeStatus(_requiredStatus, employees[_employee].status);
+        }
         _;
     }
 
@@ -76,7 +115,7 @@ contract FHEPayroll is ZamaEthereumConfig {
         externalEuint64 _encryptedSalary,
         bytes calldata _inputProof
     ) external onlyEmployer onlyStatus(_employee, EmployeeStatus.None) {
-        require(_employee != address(0), "Payroll: invalid employee address");
+        if (_employee == address(0)) revert InvalidEmployeeAddress();
 
         uint64 nowTime = uint64(block.timestamp);
         euint64 salary = FHE.fromExternal(_encryptedSalary, _inputProof);
@@ -108,10 +147,11 @@ contract FHEPayroll is ZamaEthereumConfig {
         emit EmployeeAdded(_employee);
     }
 
-    // @notice Get the Employee
-    // @param _employee  Address of the employee.
+    /// @notice Get the info of an employee
+    /// @param _employee The address of the employee
+    /// @return The Employee struct
     function getEmployee(address _employee) external view onlyEmployerOrSelf(_employee) returns (Employee memory) {
-        require(employees[_employee].status != EmployeeStatus.None, "Payroll: employee not found");
+        if (employees[_employee].status == EmployeeStatus.None) revert EmployeeNotFound();
 
         return employees[_employee];
     }
@@ -142,10 +182,9 @@ contract FHEPayroll is ZamaEthereumConfig {
     /// @param _employee  Address of the employee.
     function terminateEmployee(address _employee) external onlyEmployer {
         EmployeeStatus current = employees[_employee].status;
-        require(
-            current == EmployeeStatus.Active || current == EmployeeStatus.Inactive,
-            "Payroll: employee must be Active or Inactive"
-        );
+        if (current != EmployeeStatus.Active && current != EmployeeStatus.Inactive) {
+            revert EmployeeMustBeActiveOrInactive();
+        }
         _accrueEarnings(_employee);
 
         employees[_employee].lastUpdate = uint64(block.timestamp);
@@ -175,6 +214,7 @@ contract FHEPayroll is ZamaEthereumConfig {
 
     // ── Salary management ────────────────────────────────────────────────────
 
+    /// @notice Update an employee's salary
     /// @param _employee  Address of the employee.
     /// @param _encryptedSalary  The salary already encrypted client-side
     /// @param _inputProof       The ZK proof that the ciphertext is valid
@@ -183,11 +223,10 @@ contract FHEPayroll is ZamaEthereumConfig {
         externalEuint64 _encryptedSalary,
         bytes calldata _inputProof
     ) external onlyEmployer {
-        require(
-            employees[_employee].status == EmployeeStatus.Active ||
-                employees[_employee].status == EmployeeStatus.Inactive,
-            "Payroll: employee must be Active or Inactive"
-        );
+        EmployeeStatus current = employees[_employee].status;
+        if (current != EmployeeStatus.Active && current != EmployeeStatus.Inactive) {
+            revert EmployeeMustBeActiveOrInactive();
+        }
         _accrueEarnings(_employee);
 
         euint64 salary = FHE.fromExternal(_encryptedSalary, _inputProof);
@@ -201,10 +240,11 @@ contract FHEPayroll is ZamaEthereumConfig {
         emit SalaryUpdated(_employee);
     }
 
-    /// @notice Returns the encrypted handle  of the salary (expressed in payment token per second)
+    /// @notice Returns the encrypted handle of the salary (expressed in payment token per second)
     /// @param _employee  Address of the employee.
+    /// @return The encrypted salary handle
     function getSalary(address _employee) external view onlyEmployerOrSelf(_employee) returns (euint64) {
-        require(employees[_employee].status != EmployeeStatus.None, "Payroll: employee not found");
+        if (employees[_employee].status == EmployeeStatus.None) revert EmployeeNotFound();
 
         return employees[_employee].encSalary;
     }
@@ -213,7 +253,7 @@ contract FHEPayroll is ZamaEthereumConfig {
     ///         claimable balance without changing employment status.
     /// @param _employee  Address of the employee.
     function accrueEarnings(address _employee) external onlyEmployerOrSelf(_employee) {
-        require(employees[_employee].status == EmployeeStatus.Active, "Payroll: employee must be Active");
+        if (employees[_employee].status != EmployeeStatus.Active) revert EmployeeNotActive();
         _accrueEarnings(_employee);
     }
 
@@ -246,12 +286,14 @@ contract FHEPayroll is ZamaEthereumConfig {
     ///         Deactivation/termination stops accrual but does not forfeit
     ///         any already-accrued balance.
     function claimPay() external {
-        require(
-            employees[msg.sender].status == EmployeeStatus.Active ||
-                employees[msg.sender].status == EmployeeStatus.Inactive ||
-                employees[msg.sender].status == EmployeeStatus.Terminated,
-            "Payroll: employee not found"
-        );
+        EmployeeStatus current = employees[msg.sender].status;
+        if (
+            current != EmployeeStatus.Active &&
+            current != EmployeeStatus.Inactive &&
+            current != EmployeeStatus.Terminated
+        ) {
+            revert EmployeeNotFound();
+        }
         Employee storage employee = employees[msg.sender];
         uint64 nowTime = uint64(block.timestamp);
 

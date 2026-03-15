@@ -1,27 +1,29 @@
 import { expect } from "chai";
 import { ethers, fhevm } from "hardhat";
 import { FhevmType } from "@fhevm/hardhat-plugin";
+import { FHEToken, FHEToken__factory } from "../types";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("FHEToken", function () {
-  let token: any;
-  let owner: any;
-  let recipient: any;
-  let other: any;
+  let token: FHEToken;
+  let owner: HardhatEthersSigner;
+  let recipient: HardhatEthersSigner;
 
   const INITIAL_AMOUNT = 1000;
   const TRANSFER_AMOUNT = 100;
 
   beforeEach(async function () {
-    [owner, recipient, other] = await ethers.getSigners();
+    [owner, recipient] = await ethers.getSigners();
 
     // Deploy FHEToken contract
-    token = await ethers.deployContract("FHEToken", [
+    const tokenFactory = (await ethers.getContractFactory("FHEToken")) as FHEToken__factory;
+    token = await tokenFactory.deploy(
       owner.address,
       INITIAL_AMOUNT,
       "Confidential Token",
       "CTKN",
       "https://example.com/token",
-    ]);
+    );
   });
 
   describe("Confidential Transfer Process", function () {
@@ -60,8 +62,8 @@ describe("FHEToken", function () {
       const ownerBalanceHandle = await token.confidentialBalanceOf(owner.address);
       console.log(`recipientBalanceHandle: ${recipientBalanceHandle}`);
       console.log(`ownerBalanceHandle: ${ownerBalanceHandle}`);
-      expect(recipientBalanceHandle).to.not.be.undefined;
-      expect(ownerBalanceHandle).to.not.be.undefined;
+      expect(recipientBalanceHandle).to.not.equal(0n);
+      expect(ownerBalanceHandle).to.not.equal(0n);
     });
   });
 });
