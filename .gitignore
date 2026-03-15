@@ -15,6 +15,9 @@ types
 deployments
 tmp
 
+# claude
+.claude
+
 # files
 *.env
 *.log
