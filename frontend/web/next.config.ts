@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  images: { unoptimized: true },
+  // headers() is honoured by `next dev` but ignored by static export.
+  // In production the equivalent headers are served by Cloudflare Pages
+  // via public/_headers (committed to the repo).
   async headers() {
     return [
       {
